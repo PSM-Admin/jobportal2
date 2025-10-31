@@ -12,7 +12,7 @@ pipeline {
             steps {
                 echo '🔄 Checking out code from GitHub...'
                 git branch: 'master',
-                    url: 'https://github.com/girisettyramakrishna/MERN_CI-CD4.git'
+                    url: 'https://github.com/PSM-Admin/PSM_JobPortal2.git'
             }
         }
 

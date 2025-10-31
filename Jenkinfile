@@ -1,0 +1,63 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_COMPOSE_FILE = 'docker-compose.yml'
+        PATH = "/usr/local/bin:/usr/bin:/bin"
+        DOCKERHUB_USERNAME = '' // optional: set if pushing to Docker Hub
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo '🔄 Checking out code from GitHub...'
+                git branch: 'master',
+                    url: 'https://github.com/girisettyramakrishna/MERN_CI-CD4.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                echo '📦 Installing Node.js dependencies...'
+                sh """
+                   export PATH=${PATH}
+                   if [ -f package.json ]; then
+                       npm install
+                   else
+                       echo '⚠️ No package.json found — skipping npm install.'
+                   fi
+                """
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                echo '🏗 Building Docker images using Docker Compose...'
+                sh """
+                   export PATH=${PATH}
+                   docker-compose -f ${DOCKER_COMPOSE_FILE} build
+                """
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                echo '🚀 Deploying application using Docker Compose...'
+                sh """
+                   export PATH=${PATH}
+                   docker-compose -f ${DOCKER_COMPOSE_FILE} down
+                   docker-compose -f ${DOCKER_COMPOSE_FILE} up -d
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ MERN app deployed successfully via Docker Compose!'
+        }
+        failure {
+            echo '❌ Deployment failed. Check Jenkins logs for details.'
+        }
+    }
+}
